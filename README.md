@@ -1,4 +1,4 @@
-# 🌬️ Brisa - Brazilian NFC-e Invoice Extraction Library
+# 🌬️ Brisa - Brazilian Invoice Scraping Agent
 
 Brisa is a Go library for retrieving and parsing Brazilian electronic invoices
 (NFC-e) from SEFAZ (State Treasury Department). It provides a simple, reliable
@@ -46,9 +46,6 @@ As a Library
 package main
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/glwbr/brisa"
 )
 
