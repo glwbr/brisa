@@ -11,19 +11,25 @@ import (
 	"github.com/glwbr/brisa/invoice"
 	"github.com/glwbr/brisa/portal/ba"
 	"github.com/glwbr/brisa/scraper"
+	"github.com/glwbr/brisa/server"
 )
 
 func main() {
-	mode := flag.String("mode", "parse", "Mode: 'parse' (from file) or 'scrape' (from portal)")
+	mode := flag.String("mode", "parse", "Mode: 'parse' (from file), 'scrape' (from portal), or 'server' (http api)")
 	portal := flag.String("portal", "BA", "NFC-e portal (e.g. BA)")
 	file := flag.String("file", "", "Path to HTML file to parse (parse mode)")
 	key := flag.String("key", "", "NFC-e access key (scrape mode)")
 	output := flag.String("output", "", "Output directory for scraped HTML (scrape mode)")
 	captchaFile := flag.String("captcha-output", "captcha.png", "Path to save captcha image (scrape mode)")
+	addr := flag.String("addr", ":8080", "Server address (server mode)")
 
 	flag.Parse()
 
 	switch *mode {
+	case "server":
+		if err := server.NewServer().Start(*addr); err != nil {
+			log.Fatal(err)
+		}
 	case "parse":
 		if *file == "" {
 			log.Fatal("missing --file for parse mode")
