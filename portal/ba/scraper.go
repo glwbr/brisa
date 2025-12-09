@@ -96,17 +96,27 @@ func (s *Scraper) FetchByAccessKey(ctx context.Context, accessKey string) (*scra
 		return nil, scraper.ErrNoCaptchaSolver
 	}
 
-	challenge, err := s.GetCaptcha(ctx)
-	if err != nil {
-		return nil, err
-	}
+	for {
+		challenge, err := s.GetCaptcha(ctx)
+		if err != nil {
+			return nil, err
+		}
 
-	solution, err := s.captchaSolver.Solve(ctx, challenge)
-	if err != nil {
-		return nil, err
-	}
+		solution, err := s.captchaSolver.Solve(ctx, challenge)
+		if err != nil {
+			return nil, err
+		}
 
-	return s.SubmitWithCaptcha(ctx, accessKey, solution.Text)
+		result, err := s.SubmitWithCaptcha(ctx, accessKey, solution.Text)
+		if errors.Is(err, scraper.ErrCaptchaInvalid) {
+			fmt.Println("Invalid captcha, retrying...")
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	}
 }
 
 func (s *Scraper) loadAccessKeyPage(ctx context.Context) error {
@@ -242,12 +252,13 @@ func (s *Scraper) loadTab(ctx context.Context, currentHTML []byte, tab Tab) ([]b
 func checkForErrors(html []byte) error {
 	s := strings.ToLower(string(html))
 	patterns := map[string]error{
-		"chave de acesso inválida": scraper.ErrInvalidAccessKey,
-		"nfc-e não encontrada":     scraper.ErrInvoiceNotFound,
-		"captcha inválido":         scraper.ErrCaptchaInvalid,
-		"sessão expirada":          scraper.ErrSessionExpired,
-		"ocorreu um erro":          scraper.ErrUnexpectedResponse,
-		"object reference not set": scraper.ErrUnexpectedResponse,
+		"chave de acesso inválida":         scraper.ErrInvalidAccessKey,
+		"nfc-e não encontrada":             scraper.ErrInvoiceNotFound,
+		"captcha inválido":                 scraper.ErrCaptchaInvalid,
+		"código incorreto tente novamente": scraper.ErrCaptchaInvalid,
+		"sessão expirada":                  scraper.ErrSessionExpired,
+		"ocorreu um erro":                  scraper.ErrUnexpectedResponse,
+		"object reference not set":         scraper.ErrUnexpectedResponse,
 	}
 	for pattern, err := range patterns {
 		if strings.Contains(s, pattern) {

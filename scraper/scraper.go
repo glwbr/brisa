@@ -8,6 +8,7 @@ import (
 	"github.com/glwbr/brisa/invoice"
 )
 
+// TODO: normalize the errors and its messages for the API
 var (
 	ErrAccessKeyRequired  = errors.New("access key is required")
 	ErrInvalidAccessKey   = errors.New("invalid access key format")
