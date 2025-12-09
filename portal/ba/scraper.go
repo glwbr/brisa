@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/glwbr/brisa/internal/http"
+	"github.com/glwbr/brisa/invoice"
 	"github.com/glwbr/brisa/scraper"
 )
 
@@ -46,7 +47,7 @@ func (s *Scraper) GetCaptcha(ctx context.Context) (*scraper.CaptchaChallenge, er
 
 func (s *Scraper) SubmitWithCaptcha(ctx context.Context, accessKey, captchaSolution string) (*scraper.Result, error) {
 	accessKey = normalizeAccessKey(accessKey)
-	if len(accessKey) != 44 {
+	if !invoice.IsValidAccessKey(accessKey) {
 		return nil, scraper.ErrInvalidAccessKey
 	}
 
@@ -92,6 +93,11 @@ func (s *Scraper) SubmitWithCaptcha(ctx context.Context, accessKey, captchaSolut
 }
 
 func (s *Scraper) FetchByAccessKey(ctx context.Context, accessKey string) (*scraper.Result, error) {
+	accessKey = normalizeAccessKey(accessKey)
+	if !invoice.IsValidAccessKey(accessKey) {
+		return nil, scraper.ErrInvalidAccessKey
+	}
+
 	if s.captchaSolver == nil {
 		return nil, scraper.ErrNoCaptchaSolver
 	}
