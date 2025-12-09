@@ -12,10 +12,10 @@ var (
 )
 
 type CaptchaChallenge struct {
-	ID          string
-	Image       []byte
-	ContentType string
-	Metadata    map[string]string
+	ID          string            `json:"id"`
+	Image       []byte            `json:"image"`
+	ContentType string            `json:"contentType"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 type CaptchaSolution struct {
